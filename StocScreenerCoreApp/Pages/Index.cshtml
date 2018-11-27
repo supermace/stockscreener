@@ -1,0 +1,90 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Stock Screener";
+}
+<!--
+        public string NameSort { get; set; }
+        public string TickerSort { get; set; }
+        public string PriceSort { get; set; }
+        public string PriceToBookSort { get; set; }
+        public string PriceToEarningsSort { get; set; }
+        public string ROESort { get; set; }
+        public string ROEDividedPriceToBookSort { get; set; }
+        public string DividendSort { get; set; }
+        public string EarningsPerYearSort { get; set; }
+        public string EarningsProjectedNextPeriodSort { get; set; }
+        public string StockPriceProjectedSort { get; set; }
+        public string PriceVsProjectedSort { get; set; }
+        public string GrahamValueSort { get; set; }
+        public string RankPriceToBookSort { get; set; }
+        public string RankPriceToEarningsSort { get; set; }
+        public string RankDividendSort { get; set; }
+        public string RankTotalSort { get; set; } -->
+<div class="row">
+    <div class="col-md-3">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        <a asp-page="./Index" asp-route-sortOrder="@Model.NameSort">
+                            Name
+                        </a>
+                    </th>
+                    <th><a asp-page="./Index" asp-route-sortOrder="@Model.TickerSort">Ticker</a></th>
+                    <th><a asp-page="./Index" asp-route-sortOrder="@Model.PriceSort">Price</a></th>
+                    <th><a asp-page="./Index" asp-route-sortOrder="@Model.PriceToBookSort">P/B</a></th>
+                    <th><a asp-page="./Index" asp-route-sortOrder="@Model.PriceToEarningsSort">P/E</a></th>
+                    <th><a asp-page="./Index" asp-route-sortOrder="@Model.ROESort">ROE%</a></th>
+                    <th><a asp-page="./Index" asp-route-sortOrder="@Model.ROEDividedPriceToBookSort">ROE / P/B</a></th>
+                    <th><a asp-page="./Index" asp-route-sortOrder="@Model.DividendSort">Dividend % </a></th>
+                    <th><a asp-page="./Index" asp-route-sortOrder="@Model.EarningsPerYearSort">EPS/Year</a></th>
+                    <th><a asp-page="./Index" asp-route-sortOrder="@Model.EarningsProjectedNextPeriodSort">EPS Projected</a></th>
+                    <th><a asp-page="./Index" asp-route-sortOrder="@Model.StockPriceProjectedSort">StockPrice Projected</a></th>
+                    <th><a asp-page="./Index" asp-route-sortOrder="@Model.PriceVsProjectedSort">PriceProjected %</a></th>
+                    <th><a asp-page="./Index" asp-route-sortOrder="@Model.GrahamValueSort">Graham Value</a></th>
+                    <th><a asp-page="./Index" asp-route-sortOrder="@Model.RankPriceToBookSort">Rank P/B #</a></th>
+                    <th><a asp-page="./Index" asp-route-sortOrder="@Model.RankPriceToEarningsSort">Rank P/E #</a></th>
+                    <th><a asp-page="./Index" asp-route-sortOrder="@Model.RankDividendSort">Rank Dividend #</a></th>
+                    <th><a asp-page="./Index" asp-route-sortOrder="@Model.RankTotalSort">Rank Total #</a></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var stock in Model.Stocks)
+                {
+                    <tr>
+                        <td>@stock.Name</td>
+                        <td>@stock.Ticker</td>
+                        <td>@stock.Price</td>
+                        <td>@stock.PriceToBook</td>
+                        <td>@stock.PriceToEarnings</td>
+                        <td>@stock.ROE</td>
+                        <td>@stock.ROEDividedPriceToBook</td>
+                        <td>@stock.Dividend</td>
+                        <td>@stock.EarningsPerYear</td>
+                        <td>@stock.EarningsProjectedNextPeriod</td>
+                        <td>@stock.StockPriceProjected</td>
+                        <td>@stock.PriceVsProjected</td>
+                        <td>@stock.GrahamValue</td>
+                        <td>@stock.RankPriceToBook</td>
+                        <td>@stock.RankPriceToEarnings</td>
+                        <td>@stock.RankDividend</td>
+                        <td>@stock.RankTotal</td>
+                        @*<td>
+                                <a asp-page="./Edit" asp-route-id="@contact.Id">edit</a>
+                                <button type="submit" asp-page-handler="delete"
+                                        asp-route-id="@contact.Id">
+                                    delete
+                                </button>
+                            </td>*@
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<div>
+    <a asp-action="Refresh">Refresh the List</a>
+</div>

@@ -53,7 +53,7 @@
                 @foreach (var stock in Model.Stocks)
                 {
                     <tr>
-                        <td>@stock.Name</td>
+                        <td><a asp-page="./Details" asp-route-id="@stock.Ticker">@stock.Name</a></td>
                         <td>@stock.Ticker</td>
                         <td>@stock.Price</td>
                         <td>@stock.PriceToBook</td>

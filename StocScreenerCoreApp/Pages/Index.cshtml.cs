@@ -49,7 +49,7 @@ namespace StocScreenerCoreApp.Pages
     {
          if (_db.Stocks == null || _db.Stocks.Count() == 0)
             {
-                InitializeStocksToDb();
+                await InitializeStocksToDb();
     }
             IQueryable<Stock> stockOrderedList = from s in _db.Stocks
                                                 select s;
@@ -217,18 +217,19 @@ namespace StocScreenerCoreApp.Pages
             Stocks = await stockOrderedList.AsNoTracking().ToListAsync();
     }
 
-    //public void OnGet()
-    //    {
-    //        if (_db.Stocks == null || _db.Stocks.Count() == 0)
-    //        {
-    //            InitializeStocksToDb();
-    //        }
+        //public void OnGet()
+        //    {
+        //        if (_db.Stocks == null || _db.Stocks.Count() == 0)
+        //        {
+        //            InitializeStocksToDb();
+        //        }
 
-    //        Stocks = _db.Stocks.AsNoTracking().ToList();
+        //        Stocks = _db.Stocks.AsNoTracking().ToList();
 
-    //    }
-
-        private void InitializeStocksToDb()
+        //    }
+        private const int averageGrowthPercentage = 5;
+        private const int averageReturnOfInvestPercentage = 9;
+        private async Task InitializeStocksToDb()
         {
             var stockTicekrs = new string[] { "NDA FI",
                 //"OUT1V", "NDA FI", "VINCIT", "CTH1V", "FORTUM", "ORNBV", "SAMPO",
@@ -332,7 +333,7 @@ namespace StocScreenerCoreApp.Pages
 "KSLAV",
 "PIZZA",
 "PKK1V",
-"RESTA",
+"NOHO",
 "INVEST",
 "OREIT",
 "PNA1V",
@@ -355,7 +356,7 @@ namespace StocScreenerCoreApp.Pages
 "UUTEC",
 "RAUTE",
 "TNOM",
-"TULAV",
+// "TULAV",
 "VALOE",
 "WUF1V",
 "YLEPS",
@@ -381,7 +382,7 @@ namespace StocScreenerCoreApp.Pages
 "UNIAV",
 "BONEH",
 "FITBIO",
-"HRTIS",
+//"HRTIS",
 "NXTMH",
 "AHOLA",
 "DETEC",
@@ -395,15 +396,18 @@ namespace StocScreenerCoreApp.Pages
 "EFECTE",
 "GOFORE",
 "HEEROS",
-"VINCIT"
+"VINCIT",
+"OVARO"
 
             };
-
+            // Todo add collected stockdata first into concurrent dictionary in async way, then loop it through to have insereted it into mem database.
+            // So you can have parallel json requests, but single thread to insert db, dbcontext not support multiple threads
+            //Parallel.ForEach(stockTicekrs, async (item) =>
             foreach (var item in stockTicekrs)
             {
                 var stock = new Stock();
-                var stockInfo = StockValue(item).Result;
-                var stockData = Stock(item).Result;
+                var stockInfo = await StockValue(item); //.Result;
+                var stockData = await Stock(item); //.Result;
                 if (stockData == null)
                 {
                     continue;
@@ -412,42 +416,48 @@ namespace StocScreenerCoreApp.Pages
                 stock.Name = stockInfo.Name;
                 stock.Ticker = item;
                 stock.Price = stockInfo.Value;
-                stock.PriceToBook = stockData.latestPriceToBookRatio;
+                stock.PriceToBook = Math.Round(stockData.latestPriceToBookRatio, 2);
                 stock.PriceToEarnings = stockData.currentPriceEarningsRatio != null ? Math.Round(stockData.currentPriceEarningsRatio.value, 2) : 0;
-                stock.EarningsPerYear = isQuarterReport ? CalculateQuarters(stockData.valuationReports) : CalculateHalfYear(stockData.valuationReports);
+                stock.EarningsPerYear = Math.Round(isQuarterReport ? CalculateQuarters(stockData.valuationReports) : CalculateHalfYear(stockData.valuationReports), 2);
                 stock.EarningsProjectedNextPeriod = stock.PriceToEarnings != 0 ? Math.Round((stockInfo.Value / stock.PriceToEarnings) - (isQuarterReport ? CalculateQuarters(stockData.valuationReports, true) : CalculateHalfYear(stockData.valuationReports, true)), 2) : 0;
-                stock.StockPriceProjected = Math.Round(stock.PriceToEarnings * stock.EarningsPerYear, 2);
+                // Math.Round(stock.PriceToEarnings * stock.EarningsPerYear, 2);
                 //stock.PriceVsProjected = 0; stock.StockPriceProjected != 0 ? Math.Round((stock.Price / stock.StockPriceProjected) * 100,2) : 0;
                 stock.Dividend = stockData.valuationReports.Count > 0 && stockData.valuationReports[0].dividendYieldPercentage > 0 ? Math.Round(stockData.valuationReports[0].dividendYieldPercentage, 2) : 0;
 
-                if (stock.StockPriceProjected != 0 && stock.Price > 0)
-                {
-                    stock.PriceVsProjected = Math.Round(((stock.StockPriceProjected - stock.Price) / stock.Price) * 100, 2);
-                }
+
                 stock.GrahamValue = Math.Round(stock.PriceToBook * stock.PriceToEarnings, 2);
 
-                var stockInterim = InterimReport(item).Result;
-                if (stock != null)
+                var stockInterim = await InterimReport(item); //.Result;
+
+
+                if (stock != null && stockInterim != null)
                 {
                     stock.ROE = Math.Round(stockInterim.adjustedReturnOnEquity12M, 2);
                     stock.ROEDividedPriceToBook = stock.PriceToBook > 0 ? Math.Round(stock.ROE / stock.PriceToBook, 2) : 0;
                 }
 
+                stock.StockPriceProjected = Math.Round(
+    (stock.ROE - averageGrowthPercentage) / (averageReturnOfInvestPercentage - averageGrowthPercentage) * Math.Round(stockData.latestBookValuePerShare, 2), 2);
 
 
-                _db.Stocks.Add(stock);
+                if (stock.StockPriceProjected != 0 && stock.Price > 0)
+                {
+                    stock.PriceVsProjected = Math.Round(((stock.StockPriceProjected - stock.Price) / stock.Price) * 100, 2);
+                }
+
+                await _db.Stocks.AddAsync(stock);
 
 
 
-            }
+            } //);
                                 
-            _db.SaveChangesAsync();
+            await _db.SaveChangesAsync();
 
             CalculateDividendRank(_db.Stocks);
             CalculatePERank(_db.Stocks);
             CalculatePBRank(_db.Stocks);
 
-            _db.SaveChangesAsync();
+            await _db.SaveChangesAsync();
 
             RedirectToPage("/Index");
         }
@@ -581,7 +591,7 @@ namespace StocScreenerCoreApp.Pages
                 try
                 {
                     client.BaseAddress = new Uri("https://beta.kauppalehti.fi");
-                    https://beta.kauppalehti.fi%2FOUT1V%2F5?returnMeta=true
+ //                   https://beta.kauppalehti.fi%2FOUT1V%2F5?returnMeta=true
                     var response = await client.GetAsync($"/backend/stock;cache=false;endpoint=balance/interimreports/{stockTicker}/5?returnMeta=true");
                     response.EnsureSuccessStatusCode();
 

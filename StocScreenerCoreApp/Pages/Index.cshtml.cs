@@ -163,7 +163,7 @@ namespace StocScreenerCoreApp.Pages
                 case "StockPriceProjected":
                     stockOrderedList = stockOrderedList.OrderBy(s => s.StockPriceProjected);
                     break;
-                case "StockPriceProjectedd_desc":
+                case "StockPriceProjected_desc":
                     stockOrderedList = stockOrderedList.OrderByDescending(s => s.StockPriceProjected);
                     break;
 
@@ -245,14 +245,13 @@ namespace StocScreenerCoreApp.Pages
 "UPM",
 "AMEAS",
 "FSKRS",
-"NRE1V",
+"TYRES",
 "FIA1S",
 "KESKOA",
 "KESKOB",
 "SAA1V",
 "CTY1S",
 "KOJAMO",
-"NDA1V",
 "SAMPO",
 "ORNAV",
 "ORNBV",
@@ -310,7 +309,7 @@ namespace StocScreenerCoreApp.Pages
 "OTE1V",
 "PON1V",
 "POY1V",
-"RMR1V",
+//"RMR1V",
 "ROBIT",
 "SCANFL",
 "SRV1V",
@@ -332,10 +331,10 @@ namespace StocScreenerCoreApp.Pages
 "ILK2S",
 "KSLAV",
 "PIZZA",
-"PKK1V",
+//"PKK1V",
 "NOHO",
 "INVEST",
-"OREIT",
+//"OREIT",
 "PNA1V",
 "SIEVI",
 "BIOBV",
@@ -359,7 +358,7 @@ namespace StocScreenerCoreApp.Pages
 // "TULAV",
 "VALOE",
 "WUF1V",
-"YLEPS",
+//"YLEPS",
 "DIGIA",
 "DIGIGR",
 "IFA1V",
@@ -376,7 +375,7 @@ namespace StocScreenerCoreApp.Pages
 "REMEDY",
 "AVIDLY",
 "VERK",
-"EABGB",
+//"EABGB",
 "PRIVA",
 "TITAN",
 "UNIAV",
@@ -397,7 +396,10 @@ namespace StocScreenerCoreApp.Pages
 "GOFORE",
 "HEEROS",
 "VINCIT",
-"OVARO"
+"OVARO",
+"FELLOW",
+"AALLON",
+"RUSH"
 
             };
             // Todo add collected stockdata first into concurrent dictionary in async way, then loop it through to have insereted it into mem database.
@@ -561,7 +563,8 @@ namespace StocScreenerCoreApp.Pages
         }
 
         //public async Task<IActionResult> Stock(string stockTicker)
-        public async Task<DataModel.Data> Stock(string stockTicker)
+        public async Task<DataModel.RootObject> Stock(string stockTicker)
+        //public DataModel.Data Stock(string stockTicker)
         {
             using (var client = new HttpClient())
             {
@@ -573,7 +576,7 @@ namespace StocScreenerCoreApp.Pages
 
                     var stringResult = await response.Content.ReadAsStringAsync();
                     var rawStockData = JsonConvert.DeserializeObject<RootObject>(stringResult);
-                    return rawStockData.data; // { new { Price = rawStockData.data. } };
+                    return rawStockData; // { new { Price = rawStockData.data. } };
                     //return rawStockData.data;
                 }
                 catch (HttpRequestException httpRequestException)
@@ -584,7 +587,7 @@ namespace StocScreenerCoreApp.Pages
         }
 
         //public async Task<IActionResult> Stock(string stockTicker)
-        public async Task<DataModel.InterimReports.Data> InterimReport(string stockTicker)
+        public async Task<DataModel.InterimReports.Rootobject> InterimReport(string stockTicker)
         {
             using (var client = new HttpClient())
             {
@@ -597,7 +600,7 @@ namespace StocScreenerCoreApp.Pages
 
                     var stringResult = await response.Content.ReadAsStringAsync();
                     var rawStockData = JsonConvert.DeserializeObject<StocScreenerCoreApp.DataModel.InterimReports.Rootobject>(stringResult);
-                    return rawStockData.data; // { new { Price = rawStockData.data. } };
+                    return rawStockData; // { new { Price = rawStockData.data. } };
                     //return rawStockData.data;
                 }
                 catch (HttpRequestException httpRequestException)

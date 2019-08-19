@@ -33,7 +33,7 @@ namespace StocScreenerCoreApp
             });
 
             services.AddDbContext<AppDbContext>(options =>
-                             options.UseInMemoryDatabase("name"));
+                             options.UseInMemoryDatabase("MaceStockScreenerDatabase"));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 

@@ -80,8 +80,10 @@ namespace StocScreenerCoreApp.DataModel
         public decimal dividendPerShare { get; set; }
     }
 
-    public class Data
+    public class RootObject
     {
+    //    public class Data
+    //{
         public long marketValue { get; set; }
         public MaxPriceEarningsRatio maxPriceEarningsRatio { get; set; }
         public MinPriceEarningsRatio minPriceEarningsRatio { get; set; }
@@ -99,12 +101,11 @@ namespace StocScreenerCoreApp.DataModel
         public List<ValuationReport> valuationReports { get; set; }
     }
 
-    public class Meta
-    {
-    }
+    //public class Meta
+    //{
+    //}
 
-    public class RootObject
-    {
-        public Data data { get; set; }
-    }
+  
+        //public Data data { get; set; }
+    //}
 }

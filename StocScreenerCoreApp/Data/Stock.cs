@@ -26,6 +26,9 @@ namespace StocScreenerCoreApp.Data
 
         [Required]
         public decimal Dividend { get; set; }
+
+        [Required]
+        public decimal DividendPayoutRatio { get; set; }
         [Required]
         public decimal EarningsPerYear { get; set; }
         [Required]

@@ -7,12 +7,7 @@ namespace StocScreenerCoreApp.DataModel.InterimReports
 {
         public class Rootobject
         {
-        //    public Data data { get; set; }
-        //    public Meta meta { get; set; }
-        //}
-
-        //public class Data
-        //{
+ 
             public string symbol { get; set; }
             public long sales12M { get; set; }
             public decimal changeInSales12M { get; set; }
@@ -53,8 +48,6 @@ namespace StocScreenerCoreApp.DataModel.InterimReports
             public int year { get; set; }
         }
 
-        //public class Meta
-        //{
-        //}
+  
 
 }

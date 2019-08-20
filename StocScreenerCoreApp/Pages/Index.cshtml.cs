@@ -33,6 +33,7 @@ namespace StocScreenerCoreApp.Pages
         public string ROESort { get; set; }
         public string ROEDividedPriceToBookSort { get; set; }
         public string DividendSort { get; set; }
+        public string PayoutRatioSort { get; set; }
         public string EarningsPerYearSort { get; set; }
         public string EarningsProjectedNextPeriodSort { get; set; }
         public string StockPriceProjectedSort { get; set; }
@@ -81,6 +82,7 @@ namespace StocScreenerCoreApp.Pages
             ROESort = sortOrder == "ROE" ? "ROE_desc" : "ROE";
             ROEDividedPriceToBookSort = sortOrder == "ROEDividedPriceToBook" ? "ROEDividedPriceToBook_desc" : "ROEDividedPriceToBook";
             DividendSort = sortOrder == "Dividend" ? "Dividend_desc" : "Dividend";
+            PayoutRatioSort = sortOrder == "PayoutRatio" ? "PayoutRatio_desc" : "PayoutRatio";
             EarningsPerYearSort = sortOrder == "EarningsPerYear" ? "EarningsPerYear_desc" : "EarningsPerYear";
             EarningsProjectedNextPeriodSort = sortOrder == "EarningsProjectedNextPeriod" ? "EarningsProjectedNextPeriod_desc" : "EarningsProjectedNextPeriod";
             StockPriceProjectedSort = sortOrder == "StockPriceProjected" ? "StockPriceProjected_desc" : "StockPriceProjected";
@@ -145,6 +147,12 @@ namespace StocScreenerCoreApp.Pages
                 case "Dividend_desc":
                     stockOrderedList = stockOrderedList.OrderByDescending(s => s.Dividend);
                     break;
+                case "PayoutRatio":
+                    stockOrderedList = stockOrderedList.OrderBy(s => s.DividendPayoutRatio);
+                    break;
+                case "PayoutRatio_desc":
+                    stockOrderedList = stockOrderedList.OrderByDescending(s => s.DividendPayoutRatio);
+                    break;                  
 
                 case "EarningsPerYear":
                     stockOrderedList = stockOrderedList.OrderBy(s => s.EarningsPerYear);
@@ -425,7 +433,8 @@ namespace StocScreenerCoreApp.Pages
                 // Math.Round(stock.PriceToEarnings * stock.EarningsPerYear, 2);
                 //stock.PriceVsProjected = 0; stock.StockPriceProjected != 0 ? Math.Round((stock.Price / stock.StockPriceProjected) * 100,2) : 0;
                 stock.Dividend = stockData.valuationReports.Count > 0 && stockData.valuationReports[0].dividendYieldPercentage > 0 ? Math.Round(stockData.valuationReports[0].dividendYieldPercentage, 2) : 0;
-
+                stock.DividendPayoutRatio = stockData.valuationReports.Count > 0 && stock.EarningsPerYear > 0 ? 
+                    Math.Round(stockData.valuationReports[0].dividendPerShare/ stock.EarningsPerYear, 2) : 0;
 
                 stock.GrahamValue = Math.Round(stock.PriceToBook * stock.PriceToEarnings, 2);
 

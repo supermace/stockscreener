@@ -47,33 +47,15 @@ namespace StocScreenerCoreApp.Pages
         public string CurrentSort { get; set; }
 
         public async Task OnGetAsync(string sortOrder)
-    {
+    {            
          if (_db.Stocks == null || _db.Stocks.Count() == 0)
             {
                 await InitializeStocksToDb();
-    }
+            }
             IQueryable<Stock> stockOrderedList = from s in _db.Stocks
                                                 select s;
-            /*
-               <td>@stock.Ticker</td>
-                    <td>@stock.Price</td>
-                    <td>@stock.PriceToBook</td>
-                    <td>@stock.PriceToEarnings</td>
-                    <td>@stock.ROE</td>
-                    <td>@stock.ROEDividedPriceToBook</td>
-                    <td>@stock.Dividend</td>
-                    <td>@stock.EarningsPerYear</td>
-                    <td>@stock.EarningsProjectedNextPeriod</td>
-                    <td>@stock.StockPriceProjected</td>
-                    <td>@stock.PriceVsProjected</td>
-                    <td>@stock.GrahamValue</td>
-                    <td>@stock.RankPriceToBook</td>
-                    <td>@stock.RankPriceToEarnings</td>
-
-                    <td>@stock.RankDividend</td>
-                    <td>@stock.RankTotal</td>
-             
-             */
+            
+      
             NameSort = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             TickerSort = sortOrder == "Ticker" ? "Ticker_desc" : "Ticker";
             PriceSort = sortOrder == "Price" ? "Price_desc" : "Price";
@@ -354,6 +336,7 @@ namespace StocScreenerCoreApp.Pages
 "EFO1V",
 "ELEAV",
 "ETTE",
+"OVARO",
 "EXL1V",
 "GLA1V",
 "ICP1V",
@@ -379,6 +362,7 @@ namespace StocScreenerCoreApp.Pages
 "SSH1V",
 "TEM1V",
 "TRH1V",
+// Maek sure to keep firstnorth end of the list because thos prices are queried from another api address
 "NXTGMS",
 "REMEDY",
 "AVIDLY",
@@ -404,7 +388,6 @@ namespace StocScreenerCoreApp.Pages
 "GOFORE",
 "HEEROS",
 "VINCIT",
-"OVARO",
 "FELLOW",
 "AALLON",
 "RUSH"
@@ -413,23 +396,40 @@ namespace StocScreenerCoreApp.Pages
             // Todo add collected stockdata first into concurrent dictionary in async way, then loop it through to have insereted it into mem database.
             // So you can have parallel json requests, but single thread to insert db, dbcontext not support multiple threads
             //Parallel.ForEach(stockTicekrs, async (item) =>
+            var list = "HEX";           
+            var stockValues = await StockValue(list); //.Result;
+            var firstNorthStockValues = await StockValue("FNFI"); //.Result;
             foreach (var item in stockTicekrs)
             {
+              
                 var stock = new Stock();
-                var stockInfo = await StockValue(item); //.Result;
-                var stockData = await Stock(item); //.Result;
+                var stockValueAndNameObject = stockValues?.shares.Where(x => x.symbol.Equals(item)).FirstOrDefault();
+                if (stockValueAndNameObject != null)
+                {
+                    stock.Name =  stockValueAndNameObject.name;
+                    stock.Price = Math.Round((decimal)stockValueAndNameObject.lastPrice,2);
+                }
+                else
+                {                                           
+                        stockValueAndNameObject = firstNorthStockValues?.shares.Where(x => x.symbol.Equals(item)).FirstOrDefault();
+                        if (stockValueAndNameObject != null)
+                        {
+                            stock.Name = stockValueAndNameObject.name;
+                            stock.Price = Math.Round((decimal)stockValueAndNameObject.lastPrice, 2);
+                        }                    
+                }
+               
+               var stockData = await Stock(item); //.Result;
                 if (stockData == null)
                 {
                     continue;
                 }
                 bool isQuarterReport = stockData.valuationReports.Count > 0 ? stockData.valuationReports[0].interimName.Contains('Q') : false;
-                stock.Name = stockInfo.Name;
                 stock.Ticker = item;
-                stock.Price = stockInfo.Value;
                 stock.PriceToBook = Math.Round(stockData.latestPriceToBookRatio, 2);
                 stock.PriceToEarnings = stockData.currentPriceEarningsRatio != null ? Math.Round(stockData.currentPriceEarningsRatio.value, 2) : 0;
                 stock.EarningsPerYear = Math.Round(isQuarterReport ? CalculateQuarters(stockData.valuationReports) : CalculateHalfYear(stockData.valuationReports), 2);
-                stock.EarningsProjectedNextPeriod = stock.PriceToEarnings != 0 ? Math.Round((stockInfo.Value / stock.PriceToEarnings) - (isQuarterReport ? CalculateQuarters(stockData.valuationReports, true) : CalculateHalfYear(stockData.valuationReports, true)), 2) : 0;
+                stock.EarningsProjectedNextPeriod = stock.PriceToEarnings != 0 ? Math.Round((stock.Price / stock.PriceToEarnings) - (isQuarterReport ? CalculateQuarters(stockData.valuationReports, true) : CalculateHalfYear(stockData.valuationReports, true)), 2) : 0;
                 // Math.Round(stock.PriceToEarnings * stock.EarningsPerYear, 2);
                 //stock.PriceVsProjected = 0; stock.StockPriceProjected != 0 ? Math.Round((stock.Price / stock.StockPriceProjected) * 100,2) : 0;
                 stock.Dividend = stockData.valuationReports.Count > 0 && stockData.valuationReports[0].dividendYieldPercentage > 0 ? Math.Round(stockData.valuationReports[0].dividendYieldPercentage, 2) : 0;
@@ -603,7 +603,6 @@ namespace StocScreenerCoreApp.Pages
                 try
                 {
                     client.BaseAddress = new Uri("https://beta.kauppalehti.fi");
- //                   https://beta.kauppalehti.fi%2FOUT1V%2F5?returnMeta=true
                     var response = await client.GetAsync($"/backend/stock;cache=false;endpoint=balance/interimreports/{stockTicker}/5?returnMeta=true");
                     response.EnsureSuccessStatusCode();
 
@@ -618,48 +617,60 @@ namespace StocScreenerCoreApp.Pages
                 }
             }
         }
-
-        public async Task<StockInfo> StockValue(string stockTicker)
+        // StocScreenerCoreApp.DataModel.Values
+        public async Task<DataModel.Values.Rootobject> StockValue(string list)
         {
             using (var client = new HttpClient())
             {
-                var stockInfo = new StockInfo() { Value = 0, Name = stockTicker };
+               // var stockInfo = new StockInfo() { Value = 0, Name = stockTicker };
                 try
                 {
-                    client.BaseAddress = new Uri("https://beta.kauppalehti.fi");
-                    var response = await client.GetAsync($"/porssi/porssikurssit/osake/{stockTicker}");
+                    // DataModel.Values.Rootobject
+                    var url = list == "HEX" ? "/api/pages/stocklist/XHEL" : "/api/pages/stocklist/FNFI";
+                    client.BaseAddress = new Uri("https://kauppalehti.fi");
+                    var response = await client.GetAsync(url);
+                    
+                    
                     response.EnsureSuccessStatusCode();
 
-                    var encoding = ASCIIEncoding.ASCII;
+                   //  var encoding = ASCIIEncoding.ASCII;
                     var stringResult = await response.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<StocScreenerCoreApp.DataModel.Values.Rootobject>(stringResult);
 
-                    var lastPriceIndex = stringResult.IndexOf("lastPrice");
-                    var lastPrice = stringResult.Substring(lastPriceIndex + 11, 5);
-                    if (string.IsNullOrEmpty(lastPrice) || lastPriceIndex == -1)
-                    {
-                        return stockInfo;
-                    }
-                    lastPrice = lastPrice.Split(',')[0];
-                    decimal value;
-                    if (decimal.TryParse(lastPrice.Replace("\"", ""), out value))
-                    {
-                        stockInfo.Value = value;
-                    }
-                    else
-                    {
-                        stockInfo.Value = decimal.Parse(lastPrice.Replace("\"", "").Replace(".", ","));
-                    }
+                    //client.BaseAddress = new Uri("https://www.kauppalehti.fi");
+                    //var response = await client.GetAsync($"/api/pages/stocklist/XHEL");
+                    //response.EnsureSuccessStatusCode();
 
-                    // <title>Outokumpu |
-                    var name = stringResult.Substring(stringResult.IndexOf("<title>") + 7, 25);
-                    name = name.Split('|')[0];
-                    stockInfo.Name = name;
-                    return stockInfo;
+                    //var encoding = ASCIIEncoding.ASCII;
+                    //var stringResult = await response.Content.ReadAsStringAsync();
+
+                    //var lastPriceIndex = stringResult.IndexOf("lastValue");
+                    //var lastPrice = stringResult.Substring(lastPriceIndex + 11, 5);
+                    //if (string.IsNullOrEmpty(lastPrice) || lastPriceIndex == -1)
+                    //{
+                    //    return stockInfo;
+                    //}
+                    //lastPrice = lastPrice.Split(',')[0];
+                    //decimal value;
+                    //if (decimal.TryParse(lastPrice.Replace("\"", ""), out value))
+                    //{
+                    //    stockInfo.Value = value;
+                    //}
+                    //else
+                    //{
+                    //    stockInfo.Value = decimal.Parse(lastPrice.Replace("\"", "").Replace(".", ","));
+                    //}
+
+                    //// <title>Outokumpu |
+                    //var name = stringResult.Substring(stringResult.IndexOf("<title>") + 7, 25);
+                    //name = name.Split('|')[0];
+                    //stockInfo.Name = name;
+                    //return stockInfo;
 
                 }
                 catch (HttpRequestException httpRequestException)
                 {
-                    return stockInfo;
+                    return null;
                 }
             }
 

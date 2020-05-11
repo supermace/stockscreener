@@ -28,6 +28,24 @@ body {
     margin: 15px;
 }
 
+.priceover10 {
+    background-color : darkred;
+    color : white;
+}
+
+.priceunder10 {
+    background-color: pink;
+}
+
+.priceoverminus10 {
+    background-color: lightgreen;
+}
+
+.priceunderminus10 {
+    background-color: green;
+    color: white;
+}
+
 /* Hide/rearrange for smaller screens */
 @media screen and (max-width: 767px) {
     /* Hide captions */

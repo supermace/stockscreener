@@ -222,7 +222,6 @@ namespace StocScreenerCoreApp.Pages
         private async Task InitializeStocksToDb()
         {
             var stockTicekrs = new string[] { "NDA FI",
-                //"OUT1V", "NDA FI", "VINCIT", "CTH1V", "FORTUM", "ORNBV", "SAMPO",
 "AM1",
 "KEMIRA",
 "METSA",
@@ -299,7 +298,6 @@ namespace StocScreenerCoreApp.Pages
 "OTE1V",
 "PON1V",
 "POY1V",
-//"RMR1V",
 "ROBIT",
 "SCANFL",
 "SRV1V",
@@ -320,11 +318,8 @@ namespace StocScreenerCoreApp.Pages
 "SAGCV",
 "ILK2S",
 "KSLAV",
-"PIZZA",
-//"PKK1V",
 "NOHO",
 "INVEST",
-//"OREIT",
 "PNA1V",
 "SIEVI",
 "BIOBV",
@@ -346,10 +341,8 @@ namespace StocScreenerCoreApp.Pages
 "UUTEC",
 "RAUTE",
 "TNOM",
-// "TULAV",
 "VALOE",
 "WUF1V",
-//"YLEPS",
 "DIGIA",
 "DIGIGR",
 "IFA1V",
@@ -362,18 +355,19 @@ namespace StocScreenerCoreApp.Pages
 "SSH1V",
 "TEM1V",
 "TRH1V",
+"OPTOMED",
 // Maek sure to keep firstnorth end of the list because thos prices are queried from another api address
 "NXTGMS",
+"FODELIA",
+"RELAIS",
 "REMEDY",
 "AVIDLY",
 "VERK",
-//"EABGB",
 "PRIVA",
 "TITAN",
 "UNIAV",
 "BONEH",
 "FITBIO",
-//"HRTIS",
 "NXTMH",
 "AHOLA",
 "DETEC",
@@ -579,8 +573,11 @@ namespace StocScreenerCoreApp.Pages
             {
                 try
                 {
-                    client.BaseAddress = new Uri("https://beta.kauppalehti.fi");
-                    var response = await client.GetAsync($"/backend/stock;cache=false;endpoint=balance/valuation/{stockTicker}/5?returnMeta=true");
+               // https://www.kauppalehti.fi/api/balance/interimreports/DIGIA/5
+                    // client.BaseAddress = new Uri("https://beta.kauppalehti.fi");
+                    // var response = await client.GetAsync($"/backend/stock;cache=false;endpoint=balance/valuation/{stockTicker}/5?returnMeta=true");
+                    client.BaseAddress = new Uri("https://www.kauppalehti.fi");
+                    var response = await client.GetAsync($"/api/balance/valuation/{stockTicker}/5?returnMeta=true");
                     response.EnsureSuccessStatusCode();
 
                     var stringResult = await response.Content.ReadAsStringAsync();
@@ -602,8 +599,10 @@ namespace StocScreenerCoreApp.Pages
             {
                 try
                 {
-                    client.BaseAddress = new Uri("https://beta.kauppalehti.fi");
-                    var response = await client.GetAsync($"/backend/stock;cache=false;endpoint=balance/interimreports/{stockTicker}/5?returnMeta=true");
+                    //client.BaseAddress = new Uri("https://beta.kauppalehti.fi");
+                    //var response = await client.GetAsync($"/backend/stock;cache=false;endpoint=balance/interimreports/{stockTicker}/5?returnMeta=true");
+                    client.BaseAddress = new Uri("https://www.kauppalehti.fi");
+                    var response = await client.GetAsync($"/api/balance/interimreports/{stockTicker}/5?returnMeta=true");
                     response.EnsureSuccessStatusCode();
 
                     var stringResult = await response.Content.ReadAsStringAsync();

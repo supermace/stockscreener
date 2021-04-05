@@ -283,7 +283,11 @@ namespace StocScreenerCoreApp.Pages
                     stock.PriceVsProjected = Math.Round(((stock.StockPriceProjected - stock.Price) / stock.Price) * 100, 2);
                 }
 
-                await _db.Stocks.AddAsync(stock);
+                if (!_db.Stocks.Where( x => x.Ticker == stock.Ticker).Any())
+                {
+                    await _db.Stocks.AddAsync(stock);
+                }
+               
 
 
 

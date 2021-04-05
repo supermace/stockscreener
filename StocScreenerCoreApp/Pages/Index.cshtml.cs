@@ -482,7 +482,6 @@ namespace StocScreenerCoreApp.Pages
 
 
         }
-
         // GET: Stocks/Refresh/
         public async Task<IActionResult> Refresh()
         {

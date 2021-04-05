@@ -221,172 +221,7 @@ namespace StocScreenerCoreApp.Pages
         private const int averageReturnOfInvestPercentage = 9;
         private async Task InitializeStocksToDb()
         {
-            var stockTicekrs = new string[] { "NDA FI",
-"AM1",
-"KEMIRA",
-"METSA",
-"METSB",
-"OUT1V",
-"SSABAH",
-"SSABBH",
-"STEAV",
-"STERV",
-"UPM",
-"AMEAS",
-"FSKRS",
-"TYRES",
-"FIA1S",
-"KESKOA",
-"KESKOB",
-"SAA1V",
-"CTY1S",
-"KOJAMO",
-"SAMPO",
-"ORNAV",
-"ORNBV",
-"TTALO",
-"CGCBV",
-"HUH1V",
-"KNEBV",
-"KCR",
-"METSO",
-"UPONOR",
-"VALMT",
-"WRT1V",
-"YIT",
-"NESTE",
-"NOKIA",
-"TIETO",
-"DNA",
-"ELISA",
-"TELIA1",
-"FORTUM",
-"ALTIA",
-"ATRAV",
-"HKSAV",
-"OLVAS",
-"RAIVV",
-"RAP1V",
-"ROVIO",
-"SUY1V",
-"ALMA",
-"KAMUX",
-"STCAS",
-"STCBV",
-"TOKMAN",
-"VIK1V",
-"AKTIA",
-"ATG1V",
-"CAPMAN",
-"EQV1V",
-"EVLI",
-"HOIVA",
-"TAALA",
-"TPS1V",
-"ALBAV",
-"ALBBV",
-"OKDAV",
-"OKDBV",
-"PIHLIS",
-"REG1V",
-"ASPO",
-"CAV1V",
-"CRA1V",
-"LAT1V",
-"LEHTO",
-"RAMI",
-"OTE1V",
-"PON1V",
-"POY1V",
-"ROBIT",
-"SCANFL",
-"SRV1V",
-"TIK1V",
-"VAIAS",
-"BAS1V",
-"BITTI",
-"FSC1V",
-"TLT1V",
-"AFAGR",
-"ENDOM",
-"SOSI1",
-"APETIT",
-"HARVIA",
-"HONBS",
-"MMO1V",
-"MARAS",
-"SAGCV",
-"ILK2S",
-"KSLAV",
-"NOHO",
-"INVEST",
-"PNA1V",
-"SIEVI",
-"BIOBV",
-"SILMA",
-"ACG1V",
-"CTH1V",
-"CONSTI",
-"DOV1V",
-"EFO1V",
-"ELEAV",
-"ETTE",
-"OVARO",
-"EXL1V",
-"GLA1V",
-"ICP1V",
-"KELAS",
-"NEO1V",
-"NLG1V",
-"UUTEC",
-"RAUTE",
-"TNOM",
-"VALOE",
-"WUF1V",
-"DIGIA",
-"DIGIGR",
-"IFA1V",
-"NIXU",
-"QPR1V",
-"QTCOM",
-"SIILI",
-"SOLTEQ",
-"SOPRA",
-"SSH1V",
-"TEM1V",
-"TRH1V",
-"OPTOMED",
-// Maek sure to keep firstnorth end of the list because thos prices are queried from another api address
-"NXTGMS",
-"FODELIA",
-"RELAIS",
-"REMEDY",
-"AVIDLY",
-"VERK",
-"PRIVA",
-"TITAN",
-"UNIAV",
-"BONEH",
-"FITBIO",
-"NXTMH",
-"AHOLA",
-"DETEC",
-"ESENSE",
-"FONDIA",
-"LOUD",
-"PIIPPO",
-"VMP",
-"SAVOH",
-"ADMCM",
-"EFECTE",
-"GOFORE",
-"HEEROS",
-"VINCIT",
-"FELLOW",
-"AALLON",
-"RUSH"
-
-            };
+            var stockTicekrs = Tickers.Values;
             // Todo add collected stockdata first into concurrent dictionary in async way, then loop it through to have insereted it into mem database.
             // So you can have parallel json requests, but single thread to insert db, dbcontext not support multiple threads
             //Parallel.ForEach(stockTicekrs, async (item) =>
@@ -412,8 +247,8 @@ namespace StocScreenerCoreApp.Pages
                             stock.Price = Math.Round((decimal)stockValueAndNameObject.lastPrice, 2);
                         }                    
                 }
-               
-               var stockData = await Stock(item); //.Result;
+                Task<DataModel.InterimReports.Rootobject> interimTask = InterimReport(item);
+                var stockData = await Stock(item); //.Result;
                 if (stockData == null)
                 {
                     continue;
@@ -432,9 +267,7 @@ namespace StocScreenerCoreApp.Pages
 
                 stock.GrahamValue = Math.Round(stock.PriceToBook * stock.PriceToEarnings, 2);
 
-                var stockInterim = await InterimReport(item); //.Result;
-
-
+                var stockInterim = await interimTask; //.Result;
                 if (stock != null && stockInterim != null)
                 {
                     stock.ROE = Math.Round(stockInterim.adjustedReturnOnEquity12M, 2);
@@ -635,36 +468,6 @@ namespace StocScreenerCoreApp.Pages
                    //  var encoding = ASCIIEncoding.ASCII;
                     var stringResult = await response.Content.ReadAsStringAsync();
                     return JsonConvert.DeserializeObject<StocScreenerCoreApp.DataModel.Values.Rootobject>(stringResult);
-
-                    //client.BaseAddress = new Uri("https://www.kauppalehti.fi");
-                    //var response = await client.GetAsync($"/api/pages/stocklist/XHEL");
-                    //response.EnsureSuccessStatusCode();
-
-                    //var encoding = ASCIIEncoding.ASCII;
-                    //var stringResult = await response.Content.ReadAsStringAsync();
-
-                    //var lastPriceIndex = stringResult.IndexOf("lastValue");
-                    //var lastPrice = stringResult.Substring(lastPriceIndex + 11, 5);
-                    //if (string.IsNullOrEmpty(lastPrice) || lastPriceIndex == -1)
-                    //{
-                    //    return stockInfo;
-                    //}
-                    //lastPrice = lastPrice.Split(',')[0];
-                    //decimal value;
-                    //if (decimal.TryParse(lastPrice.Replace("\"", ""), out value))
-                    //{
-                    //    stockInfo.Value = value;
-                    //}
-                    //else
-                    //{
-                    //    stockInfo.Value = decimal.Parse(lastPrice.Replace("\"", "").Replace(".", ","));
-                    //}
-
-                    //// <title>Outokumpu |
-                    //var name = stringResult.Substring(stringResult.IndexOf("<title>") + 7, 25);
-                    //name = name.Split('|')[0];
-                    //stockInfo.Name = name;
-                    //return stockInfo;
 
                 }
                 catch (HttpRequestException httpRequestException)

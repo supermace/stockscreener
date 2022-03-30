@@ -25,7 +25,7 @@ $(document).ready(function () {
             $(row).addClass("priceoverminus10");
         }
 
-        if (price > 0 && targetprice > 0 && price > offset < -10 ) {
+        if (price > 0 && targetprice > 0 && offset < 0 && offset < -10 ) {
             $(row).addClass("priceunderminus10");
         }
 

@@ -5,6 +5,10 @@ body {
     padding-bottom: 20px;
 }
 
+a {
+    color: black;
+}
+
 /* Wrapping element */
 /* Set some basic padding to keep content from hitting the edges */
 .body-content {
@@ -29,22 +33,32 @@ body {
 }
 
 .priceover10 {
-    background-color : darkred;
+    background-color : indianred;
     color : white;
 }
 
+a:link .priceover10 {
+    color: white;
+}
 .priceunder10 {
-    background-color: pink;
+    background-color: lightpink;
 }
 
 .priceoverminus10 {
     background-color: lightgreen;
 }
 
+
 .priceunderminus10 {
-    background-color: green;
+    background-color: darkseagreen;
     color: white;
 }
+
+a .priceunderminus10 {
+    color: white;
+}
+
+
 
 /* Hide/rearrange for smaller screens */
 @media screen and (max-width: 767px) {

@@ -220,6 +220,7 @@ namespace StocScreenerCoreApp.DataModel
                     "TOIVO",
                     "WITTED"
 
+
         };
     }
 }

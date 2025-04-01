@@ -263,3 +263,4 @@ __pycache__/
 Properties/PublishProfiles/
 /StocScreenerCoreApp/Properties/PublishProfiles/StockScreenerCoreApp - Web Deploy.pubxml
 /StocScreenerCoreApp/Properties
+/StocScreenerCoreApp/Properties/PublishProfiles/MaceStockScreener - Web Deploy.pubxml

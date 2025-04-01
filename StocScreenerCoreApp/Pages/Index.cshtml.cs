@@ -247,6 +247,13 @@ namespace StocScreenerCoreApp.Pages
                             stock.Price = Math.Round((decimal)stockValueAndNameObject.lastPrice, 2);
                         }                    
                 }
+                if (string.IsNullOrEmpty(stock.Name))
+                {
+                    // Log or handle the case where the stock name is not found
+                    Console.WriteLine($"Stock name not found for ticker: {item}");
+                    continue;
+                }
+
                 Task<DataModel.InterimReports.Rootobject> interimTask = InterimReport(item);
                 var stockData = await Stock(item); //.Result;
                 if (stockData == null)
@@ -261,7 +268,7 @@ namespace StocScreenerCoreApp.Pages
                 stock.EarningsProjectedNextPeriod = stock.PriceToEarnings != 0 ? Math.Round((stock.Price / stock.PriceToEarnings) - (isQuarterReport ? CalculateQuarters(stockData.valuationReports, true) : CalculateHalfYear(stockData.valuationReports, true)), 2) : 0;
                 // Math.Round(stock.PriceToEarnings * stock.EarningsPerYear, 2);
                 //stock.PriceVsProjected = 0; stock.StockPriceProjected != 0 ? Math.Round((stock.Price / stock.StockPriceProjected) * 100,2) : 0;
-                stock.Dividend = stockData.valuationReports.Count > 0 && stockData.valuationReports[0].dividendYieldPercentage > 0 ? Math.Round(stockData.valuationReports[0].dividendYieldPercentage, 2) : 0;
+                stock.Dividend = stockData.dividendYields.Count > 0 && stockData.dividendYields[0].dividendYieldPercentage > 0 ? Math.Round(stockData.dividendYields[0].dividendYieldPercentage, 2) : 0;
                 stock.DividendPayoutRatio = stockData.valuationReports.Count > 0 && stock.EarningsPerYear > 0 ? 
                     Math.Round(stockData.valuationReports[0].dividendPerShare/ stock.EarningsPerYear, 2) : 0;
 

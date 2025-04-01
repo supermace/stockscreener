@@ -74,6 +74,7 @@ namespace StocScreenerCoreApp.DataModel
                     "PIHLIS",
                     "REG1V",
                     "ASPO",
+                    "KHG",
                     "CAV1V",                   
                     "LAT1V",
                     "LEHTO",                    

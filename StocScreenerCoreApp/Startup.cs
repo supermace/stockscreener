@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using StocScreenerCoreApp.Data;
 
 namespace StocScreenerCoreApp
@@ -34,11 +35,14 @@ namespace StocScreenerCoreApp
 
             services.AddDbContext<AppDbContext>(options =>
                              options.UseInMemoryDatabase("MaceStockScreenerDatabase"));
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            //services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            services.AddRazorPages();
+            services.AddServerSideBlazor();
+            services.AddControllersWithViews();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -52,7 +56,18 @@ namespace StocScreenerCoreApp
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
-            app.UseMvc();
+            //app.UseMvc();
+            app.UseRouting();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                // Add other mappings as needed
+                endpoints.MapBlazorHub();
+                endpoints.MapFallbackToPage("/Index");
+            });
         }
     }
 }
